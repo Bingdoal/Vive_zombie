@@ -8,6 +8,9 @@ TagManager:
   - UI
   - Head
   - AK47
+  - menu
+  - monster
+  - UIcount
   layers:
   - Default
   - TransparentFX

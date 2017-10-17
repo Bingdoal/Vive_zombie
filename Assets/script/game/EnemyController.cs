@@ -19,14 +19,6 @@ public class EnemyController : MonoBehaviour {
 	private float _hp ;
 	private SkinnedMeshRenderer[] meshList;
 	private bool invincible;
-	void OnEnable(){
-		agent = this.GetComponent<UnityEngine.AI.NavMeshAgent>();
-		if (agent == null) {
-			agent = gameObject.AddComponent<UnityEngine.AI.NavMeshAgent>();
-			agent.radius = 0.3f;
-		}
-		agent.enabled = true;
-	}
 	void Start () {
 		_init();
 		meshList = this.GetComponentsInChildren<SkinnedMeshRenderer>();
@@ -49,7 +41,6 @@ public class EnemyController : MonoBehaviour {
 		if(!invincible){
 			float t = _hp - _damageAmount;
 			if (t > 0) {
-				print(invincible);
 				_hp = t;
 				StartCoroutine(EnterInvincible());
 			} else {
@@ -63,28 +54,33 @@ public class EnemyController : MonoBehaviour {
 
 	}
 	void ChangeColor(Color input){
-		foreach(var mesh in meshList){
+		foreach(SkinnedMeshRenderer mesh in meshList){
 			mesh.material.color = input;
-			print(input);
 		}
 	}
 	void HitHapticPulse(ushort duartion){
-		var deviceIndex = SteamVR_Controller.GetDeviceIndex (SteamVR_Controller.DeviceRelation.Leftmost);
-		var deviceIndex1 = SteamVR_Controller.GetDeviceIndex (SteamVR_Controller.DeviceRelation.Rightmost);
-		SteamVR_Controller.Input (deviceIndex).TriggerHapticPulse (duartion);
-		SteamVR_Controller.Input (deviceIndex1).TriggerHapticPulse (duartion);
+		int leftDevice = SteamVR_Controller.GetDeviceIndex (SteamVR_Controller.DeviceRelation.Leftmost);
+		int rightDevice = SteamVR_Controller.GetDeviceIndex (SteamVR_Controller.DeviceRelation.Rightmost);
+		SteamVR_Controller.Input (leftDevice).TriggerHapticPulse (duartion);
+		SteamVR_Controller.Input (rightDevice).TriggerHapticPulse (duartion);
 	}
-	void SwitchDead(){
+	public void SwitchDead(){
 		ani.SetBool("isDead",true);
 		agent.enabled = false;
 		this.GetComponent<CapsuleCollider>().enabled = true;
 		PlaySound(deadAC);
 		currentAction = status;
+		KillCount killCount= GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
+		killCount.AddCount(1);
+		Lean.LeanPool.Despawn(this.gameObject);
+		_init();
 	}
 	void SwitchAttack(bool value){
 		ani.SetBool("isAttack",value);
 		PlaySound(attackAC);
 		currentAction = status;
+		if(agent.isOnNavMesh)
+			agent.isStopped = value;
 	}
 	
 	IEnumerator EnterInvincible(){
@@ -98,13 +94,6 @@ public class EnemyController : MonoBehaviour {
 	// Update is called once per frame
 	int i =0 ;
 	void Update () {
-		if(_hp <=0){
-			AnimatorStateInfo asi = this.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0);
-			if(asi.normalizedTime>1f && asi.IsName("back_fall")){
-				_init();
-				Lean.LeanPool.Despawn(this.gameObject);
-			}
-		}
 		if(agent.enabled && _hp>0){
 			agent.destination = player.transform.position;
 			if(Vector3.Distance(this.transform.position,player.transform.position)<3f){
@@ -112,13 +101,13 @@ public class EnemyController : MonoBehaviour {
 			}else{
 				status = "walk";
 			}
+			ActionChange(status);
 		}
-		ActionChange(status);
 	}
 	private float timeCount = 0;
 	private float interval = 1f;
 	void ActionChange(string nextStatus){
-		if(nextStatus.CompareTo("atk")==0){
+		if(nextStatus.Equals("atk")){
 			if(timeCount>0){
 				timeCount -= Time.deltaTime;
 			}else{
@@ -128,24 +117,26 @@ public class EnemyController : MonoBehaviour {
 			}
 		}
 
-		if(nextStatus.CompareTo(currentAction)==0) return;
+		if(nextStatus.Equals(currentAction)) return;
 
-		if(nextStatus.CompareTo("walk")==0){
+		if(nextStatus.Equals("walk")){
 			SwitchAttack(false);
-			agent.isStopped = false;
-			print(status);
 		}
-		if(nextStatus.CompareTo("atk")==0){
+		if(nextStatus.Equals("atk")){
 			SwitchAttack(true);
-			agent.isStopped = true;
-			print(status);
 		}
-		if(nextStatus.CompareTo("die")==0){
+		if(nextStatus.Equals("die")){
 			SwitchDead();
-			print(status);
 		}
 	}
-	void _init(){
+	public void _init(){
+		agent = this.GetComponent<UnityEngine.AI.NavMeshAgent>();
+		if (agent == null) {
+			agent = gameObject.AddComponent<UnityEngine.AI.NavMeshAgent>();
+			agent.radius = 0.3f;
+		}
+		agent.enabled = true;
+
 		invincible = false;
 		_hp = healthPoint;
 		status = "walk";

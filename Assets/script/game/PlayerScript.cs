@@ -33,8 +33,10 @@ public class PlayerScript : MonoBehaviour {
 		} else {
 			status = "dead";
 			print(status);
-			healthPoint = 0;
-			PlaySound(dieAC);
+			healthPoint = 10;
+			_stopSpawn();
+			_playerDead();
+			// menu.SetActive(true);
 		}
 		_changeUI();
 	}
@@ -50,5 +52,20 @@ public class PlayerScript : MonoBehaviour {
 	void _changeUI(){
 		UIScript uIScript = GameObject.FindGameObjectWithTag("UI").GetComponent<UIScript>();
 		uIScript.setHP(healthPoint);
+	}
+
+	void _stopSpawn(){
+		EnemySpawnController enemySpawnController= GameObject.FindGameObjectWithTag("SpawnPoints").GetComponent<EnemySpawnController>();
+		enemySpawnController.SetGameStatus("pause");
+
+		GameObject[] enemyList = GameObject.FindGameObjectsWithTag("monster");
+			foreach(GameObject enemy in enemyList){
+				Lean.LeanPool.Despawn(enemy);
+		}
+	}
+	void _playerDead(){
+		StartGame menu = GameObject.FindGameObjectWithTag("menu").GetComponent<StartGame>();
+		menu.stopGame();
+		PlaySound(dieAC);
 	}
 }
