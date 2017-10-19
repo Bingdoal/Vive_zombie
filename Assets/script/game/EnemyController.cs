@@ -29,14 +29,14 @@ public class EnemyController : MonoBehaviour
     {
         audioSource.Stop();
         audioSource.clip = audioClip;
-        audioSource.mute = true;
+        // audioSource.mute = true;
+		audioSource.volume =  3f / Vector3.Distance(this.transform.position,navMesh.destination);
         if (!audioSource.isPlaying)
         {
             audioSource.loop = true;
             audioSource.Play();
         }
     }
-    private Color flash;
     public void ApplyDamage(float _damageAmount)
     {
         if (!invincible)
@@ -81,8 +81,7 @@ public class EnemyController : MonoBehaviour
 
         KillCount killCount = GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
         killCount.AddCount(1);
-        Lean.LeanPool.Despawn(this.gameObject);
-        _init();
+		StartCoroutine(delayRemove(3f));
     }
     void SwitchAttack(bool value)
     {
@@ -108,7 +107,7 @@ public class EnemyController : MonoBehaviour
         if (navMesh.enabled && _hp > 0)
         {
             navMesh.destination = player.transform.position;
-            if (Vector3.Distance(this.transform.position, player.transform.position) < 3f)
+            if (Vector3.Distance(this.transform.position, player.transform.position) < navMesh.stoppingDistance+1)
             {
                 status = "atk";
             }
@@ -146,7 +145,7 @@ public class EnemyController : MonoBehaviour
         if (nextStatus.Equals("atk"))
         {
             SwitchAttack(true);
-        }
+		}
         if (nextStatus.Equals("die"))
         {
             SwitchDead();
@@ -175,5 +174,11 @@ public class EnemyController : MonoBehaviour
             audioSource = this.gameObject.AddComponent<AudioSource>();
         }
         PlaySound(walkAC);
+    }
+	IEnumerator delayRemove(float delayTime)
+    {
+        yield return new WaitForSeconds(delayTime);
+        Lean.LeanPool.Despawn(this.gameObject);
+        _init();
     }
 }

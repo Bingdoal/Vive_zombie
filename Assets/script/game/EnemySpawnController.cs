@@ -47,7 +47,7 @@ public class EnemySpawnController : MonoBehaviour {
 					Vector3 spawnPosition = new Vector3(spawn.position.x - fixPosition.x,
 														spawn.position.y - fixPosition.y,
 														spawn.position.z - fixPosition.z);
-					Lean.LeanPool.Spawn(enemy[Random.Range(0,enemy.Count-1)],
+					Lean.LeanPool.Spawn(enemy[Random.Range(0,enemy.Count)],
 										spawnPosition,
 										Quaternion.identity,
 										transform);

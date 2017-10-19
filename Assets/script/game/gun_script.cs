@@ -50,10 +50,15 @@ public class gun_script : MonoBehaviour
         {
             if (hit.collider.attachedRigidbody)
             {
-                if (hit.collider.gameObject.name.Contains("zombie"))
+                if (hit.collider.gameObject.tag.Equals("monster"))
                 {
-                    EnemyController collisionObject = hit.collider.gameObject.GetComponent<EnemyController>();
-                    collisionObject.ApplyDamage(2);
+                    try{
+                        EnemyController collisionObject = hit.collider.gameObject.GetComponent<EnemyController>();
+                        collisionObject.ApplyDamage(2);
+                    }catch{
+                        MonsterController collisionObject = hit.collider.gameObject.GetComponent<MonsterController>();
+                        collisionObject.ApplyDamage(2);
+                    }
                 }
                 else
                 {
