@@ -17,7 +17,7 @@ public class MagReload : MonoBehaviour
     void Start()
     {
          gun = controllerGunHand.GetComponent<SteamVR_TrackedController>();
-        gun.Gripped += reload;
+        gun.Gripped += _reload;
 
 		 mag = magHand.GetComponent<SteamVR_TrackedController>();
 		mag.TriggerClicked+=getMag;
@@ -26,12 +26,12 @@ public class MagReload : MonoBehaviour
 
     }
 
-    void reload(object sender, ClickedEventArgs e)
+    void _reload(object sender, ClickedEventArgs e)
     {
         if (collision)
         {
-            gun_script reload = GameObject.FindGameObjectWithTag("AK47").GetComponent<gun_script>();
-            reload.reloadbullet();
+            gun_script gun = GameObject.FindGameObjectWithTag("AK47").GetComponent<gun_script>();
+            gun.Reloadbullet();
             collision = false;
 			device = SteamVR_Controller.Input((int)trackedObject.index);
 			device.TriggerHapticPulse(3999);

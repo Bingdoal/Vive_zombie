@@ -13,18 +13,20 @@ public class StartGame : MonoBehaviour
     {
 
     }
-    public void startGame()
+    // Pubic method
+    public void GameStart()
     {
         _setVisible(false);
         KillCount uiTextComponent = GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
         uiTextComponent.CountInit();
     }
-    public void stopGame()
+    public void GameStop()
     {
         _setVisible(true);
         _stopSpawn();
     }
 
+    // Private method
     void _setVisible(bool input)
     {
         if (!input)
@@ -36,7 +38,6 @@ public class StartGame : MonoBehaviour
             transform.localPosition = initPosition;
         }
     }
-    // Update is called once per frame
     void _stopSpawn()
     {
         EnemySpawnController enemySpawnController = GameObject.FindGameObjectWithTag("SpawnPoints").GetComponent<EnemySpawnController>();

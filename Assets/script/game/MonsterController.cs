@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MonsterController : MonoBehaviour {
+public class MonsterController : MonoBehaviour
+{
 
 
     [Tooltip("怪物血量")] [SerializeField] private float healthPoint = 5f;
@@ -25,96 +26,6 @@ public class MonsterController : MonoBehaviour {
     {
         _init();
     }
-    void PlaySound(AudioClip audioClip)
-    {
-        audioSource.Stop();
-        audioSource.clip = audioClip;
-        // audioSource.mute = true;
-        audioSource.volume = 3f / Vector3.Distance(this.transform.position, navMesh.destination);
-        if (!audioSource.isPlaying)
-        {
-            audioSource.loop = true;
-            audioSource.Play();
-        }
-    }
-    public void ApplyDamage(float _damageAmount)
-    {
-        if (!invincible)
-        {
-            float t = _hp - _damageAmount;
-            if (t > 0)
-            {
-                _hp = t;
-                StartCoroutine(EnterInvincible());
-				status = "GetHit";
-                ActionChange(status);
-            }
-            else
-            {
-                _hp = 0;
-                status = "die";
-                ActionChange(status);
-                HitHapticPulse(1000);
-            }
-        }
-		
-    }
-    void ChangeColor(Color input)
-    {
-        foreach (SkinnedMeshRenderer mesh in meshList)
-        {
-            mesh.material.color = input;
-        }
-    }
-    void HitHapticPulse(ushort duartion)
-    {
-        int leftDevice = SteamVR_Controller.GetDeviceIndex(SteamVR_Controller.DeviceRelation.Leftmost);
-        int rightDevice = SteamVR_Controller.GetDeviceIndex(SteamVR_Controller.DeviceRelation.Rightmost);
-        SteamVR_Controller.Input(leftDevice).TriggerHapticPulse(duartion);
-        SteamVR_Controller.Input(rightDevice).TriggerHapticPulse(duartion);
-    }
-    void SwitchDead()
-    {
-        ani.SetBool("isDead", true);
-        navMesh.enabled = false;
-
-        this.GetComponent<CapsuleCollider>().enabled = true;
-        PlaySound(deadAC);
-        currentAction = status;
-
-        KillCount killCount = GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
-        killCount.AddCount(1);
-        StartCoroutine(_delayRemove(3f));
-    }
-    void SwitchWalk(bool value){
-        if (navMesh.isOnNavMesh)
-            navMesh.isStopped = !value;
-        if(value)
-            PlaySound(walkAC);
-        currentAction = status;
-    }
-    void SwitchAttack(bool value)
-    {
-        ani.SetBool("isAttack", value);
-        if(value){
-            PlaySound(attackAC);
-            timeCount = interval;
-        }
-        currentAction = status;
-    }
-    void SwitchGetHit(bool isGetHit){
-        currentAction = status;
-        ani.SetBool("GetHit", isGetHit);
-    }
-    IEnumerator EnterInvincible()
-    {
-        invincible = true;
-        ChangeColor(Color.red);
-        yield return new WaitForSeconds(invincibleDelay);
-        ChangeColor(Color.white);
-        invincible = false;
-        StopCoroutine(EnterInvincible());
-    }
     // Update is called once per frame
     void Update()
     {
@@ -128,16 +39,14 @@ public class MonsterController : MonoBehaviour {
             else
             {
                 status = "walk";
-            }                
+            }
             ActionChange(status);
         }
-	}
+    }
     private float timeCount = 0;
     private float interval = 1f;
     void ActionChange(string nextStatus)
     {
-        
-
         if (nextStatus.Equals("atk") && !ani.GetCurrentAnimatorStateInfo(0).IsName("creature1GetHit"))
         {
             if (timeCount > 0)
@@ -153,7 +62,7 @@ public class MonsterController : MonoBehaviour {
         }
 
         if (nextStatus.Equals(currentAction)) return;
-        
+
         if (nextStatus.Equals("walk"))
         {
             SwitchAttack(false);
@@ -170,24 +79,55 @@ public class MonsterController : MonoBehaviour {
         {
             SwitchDead();
         }
-        if(nextStatus.Equals("GetHit")){
+        if (nextStatus.Equals("GetHit"))
+        {
             SwitchWalk(false);
             SwitchAttack(false);
             SwitchGetHit(true);
         }
     }
-	private IEnumerator animationDelay()
+    // Switch Action
+    void SwitchDead()
     {
-        invincible = true;
-		yield return new WaitForSeconds(3f);
-		ani.SetBool("isSpawning", false);
-        invincible = false;
-		_startWalk();
-		StopCoroutine(animationDelay());
+        ani.SetBool("isDead", true);
+        navMesh.enabled = false;
+
+        this.GetComponent<CapsuleCollider>().enabled = true;
+        _playSound(deadAC);
+        currentAction = status;
+
+        KillCount killCount = GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
+        killCount.AddCount(1);
+        StartCoroutine(_delayRemove(3f));
     }
-    public void _init()
+    void SwitchWalk(bool value)
     {
-		ani = this.GetComponent<Animator>();
+        if (navMesh.isOnNavMesh)
+            navMesh.isStopped = !value;
+        if (value)
+            _playSound(walkAC);
+        currentAction = status;
+    }
+    void SwitchAttack(bool value)
+    {
+        ani.SetBool("isAttack", value);
+        if (value)
+        {
+            _playSound(attackAC);
+            timeCount = interval;
+        }
+        currentAction = status;
+    }
+    void SwitchGetHit(bool isGetHit)
+    {
+        currentAction = status;
+        ani.SetBool("GetHit", isGetHit);
+    }
+
+    // Private method
+    void _init()
+    {
+        ani = this.GetComponent<Animator>();
 
         navMesh = this.GetComponent<UnityEngine.AI.NavMeshAgent>();
         if (navMesh == null)
@@ -195,34 +135,102 @@ public class MonsterController : MonoBehaviour {
             navMesh = gameObject.AddComponent<UnityEngine.AI.NavMeshAgent>();
             navMesh.radius = 0.3f;
         }
-		if(navMesh.isOnNavMesh)
-			navMesh.isStopped = true;
+        if (navMesh.isOnNavMesh)
+            navMesh.isStopped = true;
         invincible = false;
         _hp = healthPoint;
-        
+
         player = GameObject.FindGameObjectWithTag("Player");
         audioSource = this.GetComponent<AudioSource>();
         if (audioSource == null)
         {
             audioSource = this.gameObject.AddComponent<AudioSource>();
         }
-		meshList = this.GetComponentsInChildren<SkinnedMeshRenderer>();
+        meshList = this.GetComponentsInChildren<SkinnedMeshRenderer>();
 
-		StartCoroutine(animationDelay());
+        StartCoroutine(_animationDelay());
 
     }
-	void _startWalk(){
+    void _startWalk()
+    {
         status = "walk";
         currentAction = "walk";
-		navMesh.enabled = true;
+        navMesh.enabled = true;
         SwitchAttack(false);
         SwitchGetHit(false);
         SwitchWalk(true);
-	}
+    }
+    void _playSound(AudioClip audioClip)
+    {
+        audioSource.Stop();
+        audioSource.clip = audioClip;
+        // audioSource.mute = true;
+        audioSource.volume = 3f / Vector3.Distance(this.transform.position, navMesh.destination);
+        if (!audioSource.isPlaying)
+        {
+            audioSource.loop = true;
+            audioSource.Play();
+        }
+    }
+    void _changeColor(Color input)
+    {
+        foreach (SkinnedMeshRenderer mesh in meshList)
+        {
+            mesh.material.color = input;
+        }
+    }
+    void _hitHapticPulse(ushort duartion)
+    {
+        int leftDevice = SteamVR_Controller.GetDeviceIndex(SteamVR_Controller.DeviceRelation.Leftmost);
+        int rightDevice = SteamVR_Controller.GetDeviceIndex(SteamVR_Controller.DeviceRelation.Rightmost);
+        SteamVR_Controller.Input(leftDevice).TriggerHapticPulse(duartion);
+        SteamVR_Controller.Input(rightDevice).TriggerHapticPulse(duartion);
+    }
+    private IEnumerator _animationDelay()
+    {
+        invincible = true;
+        yield return new WaitForSeconds(3f);
+        ani.SetBool("isSpawning", false);
+        invincible = false;
+        _startWalk();
+        StopCoroutine(_animationDelay());
+    }
+    IEnumerator _enterInvincible()
+    {
+        invincible = true;
+        _changeColor(Color.red);
+        yield return new WaitForSeconds(invincibleDelay);
+        _changeColor(Color.white);
+        invincible = false;
+        StopCoroutine(_enterInvincible());
+    }
+    IEnumerator _delayRemove(float delayTime)
+    {
+        yield return new WaitForSeconds(delayTime);
+        Lean.LeanPool.Despawn(this.gameObject);
+        _init();
+    }
 
-	IEnumerator _delayRemove(float delayTime){
-		yield return new WaitForSeconds(delayTime); 
-		Lean.LeanPool.Despawn(this.gameObject);
-		_init();
-	}
+    // Public method
+    public void ApplyDamage(float _damageAmount)
+    {
+        if (!invincible)
+        {
+            float t = _hp - _damageAmount;
+            if (t > 0)
+            {
+                _hp = t;
+                StartCoroutine(_enterInvincible());
+                status = "GetHit";
+                ActionChange(status);
+            }
+            else
+            {
+                _hp = 0;
+                status = "die";
+                ActionChange(status);
+                _hitHapticPulse(1000);
+            }
+        }
+    }
 }

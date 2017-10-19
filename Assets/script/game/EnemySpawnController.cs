@@ -12,13 +12,12 @@ public class EnemySpawnController : MonoBehaviour {
 	// private Vector3 fixPosition = new Vector3(125.6f,16.8f,34.3f);
 	private Vector3 fixPosition = new Vector3(0f,0f,0f);
 	private int number = 0;
-	private string gameStauts;
+	private string gameStatus;
 	// Use this for initialization
 	void Start () {
 		timeCount = 2f;
 		
 		Transform spawnPoint = gameObject.transform.Find("SpawnPoints");
-		// Transform SpawnPoints = GameObject.FindGameObjectWithTag ("SpawnPoints").transform;
 
 		spawnPoints = spawnPoint.GetComponentInChildren<Transform>();
 		StartCoroutine (Loaditem ("monster/level1")); 
@@ -32,18 +31,17 @@ public class EnemySpawnController : MonoBehaviour {
 			yield return 0;
 	}
 	public void SetGameStatus(string input){
-		gameStauts = input;
+		gameStatus = input;
 	}
 	// Update is called once per frame
 	void Update () {
-		if(gameStauts.Equals("playing")){
+		if(gameStatus.Equals("playing")){
 			if(timeCount>0){
 				timeCount -= Time.deltaTime;
 			}else{
 				int liveEnemyCount = transform.childCount - 2;
 				if(liveEnemyCount < enemyCount){
 					Transform spawn = spawnPoints.GetChild(Random.Range(0,spawnPoints.childCount-1));
-					// spawn.SetPositionAndRotation(new Vector3(0,0,0),new Quaternion());
 					Vector3 spawnPosition = new Vector3(spawn.position.x - fixPosition.x,
 														spawn.position.y - fixPosition.y,
 														spawn.position.z - fixPosition.z);
@@ -54,8 +52,6 @@ public class EnemySpawnController : MonoBehaviour {
 				}
 				timeCount = interval;
 			}
-		}else{
-			// print("game status now is"+gameStauts);
 		}
 	}
 }

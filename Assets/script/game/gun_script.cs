@@ -19,9 +19,11 @@ public class gun_script : MonoBehaviour
     private SteamVR_TrackedController controller;
     public EffectTracer tracerEffect;
     public Transform muzzleTransform;
+    private int bulletNum;
     // Use this for initialization
     void Start()
     {
+        bulletNum = bullet;
         _bulletDisplay();
         controller = controllerLeft.GetComponent<SteamVR_TrackedController>();
         trackedObject = controllerLeft.GetComponent<SteamVR_TrackedObject>();
@@ -36,16 +38,16 @@ public class gun_script : MonoBehaviour
     {
         ShootWeapon();
     }
-    public void ShootWeapon()
+    void ShootWeapon()
     {
 
         RaycastHit hit = new RaycastHit();
         Ray ray = new Ray(muzzleTransform.position, muzzleTransform.forward);
         device = SteamVR_Controller.Input((int)trackedObject.index);
-        PlaySound(gun_sound);
+        _playSound(gun_sound);
         device.TriggerHapticPulse(3999);
         tracerEffect.ShowTracerEffect(muzzleTransform.position, muzzleTransform.forward, 250f);
-        bullet--;
+        bulletNum--;
         if (Physics.Raycast(ray, out hit, 5000f))
         {
             if (hit.collider.attachedRigidbody)
@@ -67,7 +69,7 @@ public class gun_script : MonoBehaviour
                         EnemySpawnController enemySpawnController = GameObject.FindGameObjectWithTag("SpawnPoints").GetComponent<EnemySpawnController>();
                         enemySpawnController.SetGameStatus("playing");
                         StartGame menu = GameObject.FindGameObjectWithTag("menu").GetComponent<StartGame>();
-                        menu.startGame();
+                        menu.StartGame();
                     }
                 }
 
@@ -75,30 +77,12 @@ public class gun_script : MonoBehaviour
         }
 
     }
-    private void nobullet()
-    {
-        if (!audioSource.isPlaying)
-        {
-            PlaySound(bulletEmpty);
-        }
-    }
-    public void reloadbullet()
-    {
-        PlaySound(reloadsound);
-        bullet = 30;
-        _bulletDisplay();
-    }
-    void PlaySound(AudioClip audioClip)
-    {
-        audioSource.clip = audioClip;
-        audioSource.Play();
-    }
+    
     // Update is called once per frame
-
     private float timeCount = 0;
     void Update()
     {
-        if (controller.triggerPressed && bullet > 0)
+        if (controller.triggerPressed && bulletNum > 0)
         {
 
             if (timeCount > 0)
@@ -112,17 +96,34 @@ public class gun_script : MonoBehaviour
             }
 
         }
-        else if (bullet <= 0 && controller.triggerPressed)
+        else if (bulletNum <= 0 && controller.triggerPressed)
         {
-            nobullet();
+            _noBullet();
         }
         _bulletDisplay();
     }
-
     private void _bulletDisplay()
     {
         UIScript uIScript = GameObject.FindGameObjectWithTag("UI").GetComponent<UIScript>();
-        uIScript.setBullet(bullet);
+        uIScript.setBullet(bulletNum);
     }
-
+    private void _noBullet()
+    {
+        if (!audioSource.isPlaying)
+        {
+            _playSound(bulletEmpty);
+        }
+    }
+    void _playSound(AudioClip audioClip)
+    {
+        audioSource.clip = audioClip;
+        audioSource.Play();
+    }
+    // Public method
+    public void Reloadbullet()
+    {
+        _playSound(reloadsound);
+        bulletNum = bullet;
+        _bulletDisplay();
+    }
 }

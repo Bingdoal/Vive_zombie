@@ -23,83 +23,32 @@ public class EnemyController : MonoBehaviour
     void Start()
     {
         _init();
+    }
+    void _init()
+    {
         meshList = this.GetComponentsInChildren<SkinnedMeshRenderer>();
-    }
-    void PlaySound(AudioClip audioClip)
-    {
-        audioSource.Stop();
-        audioSource.clip = audioClip;
-        // audioSource.mute = true;
-		audioSource.volume =  3f / Vector3.Distance(this.transform.position,navMesh.destination);
-        if (!audioSource.isPlaying)
-        {
-            audioSource.loop = true;
-            audioSource.Play();
-        }
-    }
-    public void ApplyDamage(float _damageAmount)
-    {
-        if (!invincible)
-        {
-            float t = _hp - _damageAmount;
-            if (t > 0)
-            {
-                _hp = t;
-                StartCoroutine(EnterInvincible());
-            }
-            else
-            {
-                _hp = 0;
-                status = "die";
-                ActionChange(status);
-                HitHapticPulse(1000);
-            }
-        }
-    }
-    void ChangeColor(Color input)
-    {
-        foreach (SkinnedMeshRenderer mesh in meshList)
-        {
-            mesh.material.color = input;
-        }
-    }
-    void HitHapticPulse(ushort duartion)
-    {
-        int leftDevice = SteamVR_Controller.GetDeviceIndex(SteamVR_Controller.DeviceRelation.Leftmost);
-        int rightDevice = SteamVR_Controller.GetDeviceIndex(SteamVR_Controller.DeviceRelation.Rightmost);
-        SteamVR_Controller.Input(leftDevice).TriggerHapticPulse(duartion);
-        SteamVR_Controller.Input(rightDevice).TriggerHapticPulse(duartion);
-    }
-    public void SwitchDead()
-    {
-        ani.SetBool("isDead", true);
-        navMesh.enabled = false;
 
-        this.GetComponent<CapsuleCollider>().enabled = true;
-        PlaySound(deadAC);
-        currentAction = status;
+        navMesh = this.GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (navMesh == null)
+        {
+            navMesh = gameObject.AddComponent<UnityEngine.AI.NavMeshAgent>();
+            navMesh.radius = 0.3f;
+        }
+        navMesh.enabled = true;
 
-        KillCount killCount = GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
-        killCount.AddCount(1);
-		StartCoroutine(delayRemove(3f));
-    }
-    void SwitchAttack(bool value)
-    {
-        ani.SetBool("isAttack", value);
-        PlaySound(attackAC);
-        currentAction = status;
-        if (navMesh.isOnNavMesh)
-            navMesh.isStopped = value;
-    }
-
-    IEnumerator EnterInvincible()
-    {
-        invincible = true;
-        ChangeColor(Color.red);
-        yield return new WaitForSeconds(delay);
-        ChangeColor(Color.white);
         invincible = false;
-        StopCoroutine(EnterInvincible());
+        _hp = healthPoint;
+        status = "walk";
+        currentAction = "walk";
+
+        player = GameObject.FindGameObjectWithTag("Player");
+        ani = this.GetComponent<Animator>();
+        audioSource = this.GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = this.gameObject.AddComponent<AudioSource>();
+        }
+        _playSound(walkAC);
     }
     // Update is called once per frame
     void Update()
@@ -151,34 +100,88 @@ public class EnemyController : MonoBehaviour
             SwitchDead();
         }
     }
-    public void _init()
+    // Switch Action
+    void SwitchDead()
     {
-        navMesh = this.GetComponent<UnityEngine.AI.NavMeshAgent>();
-        if (navMesh == null)
-        {
-            navMesh = gameObject.AddComponent<UnityEngine.AI.NavMeshAgent>();
-            navMesh.radius = 0.3f;
-        }
-        navMesh.enabled = true;
+        ani.SetBool("isDead", true);
+        navMesh.enabled = false;
 
-        invincible = false;
-        _hp = healthPoint;
-        status = "walk";
-        currentAction = "walk";
+        this.GetComponent<CapsuleCollider>().enabled = true;
+        _playSound(deadAC);
+        currentAction = status;
 
-        player = GameObject.FindGameObjectWithTag("Player");
-        ani = this.GetComponent<Animator>();
-        audioSource = this.GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = this.gameObject.AddComponent<AudioSource>();
-        }
-        PlaySound(walkAC);
+        KillCount killCount = GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
+        killCount.AddCount(1);
+        StartCoroutine(_delayRemove(3f));
     }
-	IEnumerator delayRemove(float delayTime)
+    void SwitchAttack(bool value)
+    {
+        ani.SetBool("isAttack", value);
+        _playSound(attackAC);
+        currentAction = status;
+        if (navMesh.isOnNavMesh)
+            navMesh.isStopped = value;
+    }
+
+    // Private method
+    void _playSound(AudioClip audioClip)
+    {
+        audioSource.Stop();
+        audioSource.clip = audioClip;
+        audioSource.volume = 3f / Vector3.Distance(this.transform.position, navMesh.destination);
+        if (!audioSource.isPlaying)
+        {
+            audioSource.loop = true;
+            audioSource.Play();
+        }
+    }
+	IEnumerator _delayRemove(float delayTime)
     {
         yield return new WaitForSeconds(delayTime);
         Lean.LeanPool.Despawn(this.gameObject);
         _init();
+    }
+    IEnumerator _enterInvincible()
+    {
+        invincible = true;
+        _changeColor(Color.red);
+        yield return new WaitForSeconds(delay);
+        _changeColor(Color.white);
+        invincible = false;
+        StopCoroutine(_enterInvincible());
+    }
+    void _changeColor(Color input)
+    {
+        foreach (SkinnedMeshRenderer mesh in meshList)
+        {
+            mesh.material.color = input;
+        }
+    }
+    void _hitHapticPulse(ushort duartion)
+    {
+        int leftDevice = SteamVR_Controller.GetDeviceIndex(SteamVR_Controller.DeviceRelation.Leftmost);
+        int rightDevice = SteamVR_Controller.GetDeviceIndex(SteamVR_Controller.DeviceRelation.Rightmost);
+        SteamVR_Controller.Input(leftDevice).TriggerHapticPulse(duartion);
+        SteamVR_Controller.Input(rightDevice).TriggerHapticPulse(duartion);
+    }
+    // Public method
+    public void ApplyDamage(float _damageAmount)
+    {
+        if (!invincible)
+        {
+            float t = _hp - _damageAmount;
+            if (t > 0)
+            {
+                _hp = t;
+                StartCoroutine(_enterInvincible());
+            }
+            else
+            {
+                _hp = 0;
+                status = "die";
+                ActionChange(status);
+                _hitHapticPulse(1000);
+            }
+        }
     }
 }

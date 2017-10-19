@@ -27,23 +27,8 @@ public class PlayerScript : MonoBehaviour
     {
 
     }
-    public void ApplyDamage(float _damage)
-    {
-        float t = _hp - _damage;
-        PlaySound(attackedAC);
-        if (t > 0)
-        {
-            _hp = t;
-        }
-        else
-        {
-            status = "dead";
-            _hp = healthPoint;
-            _playerDead();
-        }
-        _changeUI(_hp);
-    }
-    void PlaySound(AudioClip audioClip)
+    // Private method
+    void _playSound(AudioClip audioClip)
     {
         audioSource.Stop();
         audioSource.clip = audioClip;
@@ -61,7 +46,25 @@ public class PlayerScript : MonoBehaviour
     void _playerDead()
     {
         StartGame menu = GameObject.FindGameObjectWithTag("menu").GetComponent<StartGame>();
-        menu.stopGame();
-        PlaySound(dieAC);
+        menu.GameStop();
+        _playSound(dieAC);
+    }
+
+    // Public method
+    public void ApplyDamage(float _damage)
+    {
+        float t = _hp - _damage;
+        _playSound(attackedAC);
+        if (t > 0)
+        {
+            _hp = t;
+        }
+        else
+        {
+            status = "dead";
+            _hp = healthPoint;
+            _playerDead();
+        }
+        _changeUI(_hp);
     }
 }
