@@ -11,6 +11,8 @@ public class MonsterController : MonoBehaviour
     [Tooltip("攻擊音效")] [SerializeField] private AudioClip attackAC;
     [Tooltip("死亡音效")] [SerializeField] private AudioClip deadAC;
     [Tooltip("走路音效")] [SerializeField] private AudioClip walkAC;
+    [Tooltip("音效")] [SerializeField] private AudioClip getHitAC;
+    [Tooltip("音效2")] [SerializeField] private AudioClip roarAC;
     [Tooltip("無敵時間")] [SerializeField] private float invincibleDelay;
 
     private UnityEngine.AI.NavMeshAgent navMesh;
@@ -24,7 +26,7 @@ public class MonsterController : MonoBehaviour
     private bool invincible;
     void Start()
     {
-        _init();
+        OnInit();
     }
     // Update is called once per frame
     void Update()
@@ -93,7 +95,6 @@ public class MonsterController : MonoBehaviour
         navMesh.enabled = false;
 
         this.GetComponent<CapsuleCollider>().enabled = true;
-        _playSound(deadAC);
         currentAction = status;
 
         KillCount killCount = GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
@@ -104,8 +105,6 @@ public class MonsterController : MonoBehaviour
     {
         if (navMesh.isOnNavMesh)
             navMesh.isStopped = !value;
-        if (value)
-            _playSound(walkAC);
         currentAction = status;
     }
     void SwitchAttack(bool value)
@@ -113,7 +112,7 @@ public class MonsterController : MonoBehaviour
         ani.SetBool("isAttack", value);
         if (value)
         {
-            _playSound(attackAC);
+            playSoundOneTime(attackAC);
             timeCount = interval;
         }
         currentAction = status;
@@ -121,11 +120,12 @@ public class MonsterController : MonoBehaviour
     void SwitchGetHit(bool isGetHit)
     {
         currentAction = status;
+        playSoundOneTime(getHitAC);
         ani.SetBool("GetHit", isGetHit);
     }
 
     // Private method
-    void _init()
+    public void OnInit()
     {
         ani = this.GetComponent<Animator>();
 
@@ -147,7 +147,7 @@ public class MonsterController : MonoBehaviour
             audioSource = this.gameObject.AddComponent<AudioSource>();
         }
         meshList = this.GetComponentsInChildren<SkinnedMeshRenderer>();
-
+        
         StartCoroutine(_animationDelay());
 
     }
@@ -160,17 +160,22 @@ public class MonsterController : MonoBehaviour
         SwitchGetHit(false);
         SwitchWalk(true);
     }
-    void _playSound(AudioClip audioClip)
-    {
+    // void _playSound(AudioClip audioClip)
+    // {
+    //     audioSource.Stop();
+    //     audioSource.clip = audioClip;
+    //     audioSource.volume = 3f / Vector3.Distance(this.transform.position, navMesh.destination);
+    //     if (!audioSource.isPlaying)
+    //     {
+    //         audioSource.loop = true;
+    //         audioSource.Play();
+    //     }
+    // }
+    void playSoundOneTime(AudioClip audioClip){
         audioSource.Stop();
         audioSource.clip = audioClip;
-        // audioSource.mute = true;
-        audioSource.volume = 3f / Vector3.Distance(this.transform.position, navMesh.destination);
-        if (!audioSource.isPlaying)
-        {
-            audioSource.loop = true;
-            audioSource.Play();
-        }
+        audioSource.Play();
+
     }
     void _changeColor(Color input)
     {
@@ -189,7 +194,9 @@ public class MonsterController : MonoBehaviour
     private IEnumerator _animationDelay()
     {
         invincible = true;
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(1.5f);
+        playSoundOneTime(roarAC);
+        yield return new WaitForSeconds(1f);
         ani.SetBool("isSpawning", false);
         invincible = false;
         _startWalk();
@@ -206,9 +213,9 @@ public class MonsterController : MonoBehaviour
     }
     IEnumerator _delayRemove(float delayTime)
     {
+        playSoundOneTime(deadAC);
         yield return new WaitForSeconds(delayTime);
         Lean.LeanPool.Despawn(this.gameObject);
-        _init();
     }
 
     // Public method

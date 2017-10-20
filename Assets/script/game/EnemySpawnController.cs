@@ -9,9 +9,8 @@ public class EnemySpawnController : MonoBehaviour {
 	private float timeCount = 0;
 	private Transform spawnPoints;
 	private List<GameObject> enemy = new List<GameObject>();
-	// private Vector3 fixPosition = new Vector3(125.6f,16.8f,34.3f);
-	private Vector3 fixPosition = new Vector3(0f,0f,0f);
 	private int number = 0;
+	private bool bigMonsterSpawned = true;
 	private string gameStatus;
 	// Use this for initialization
 	void Start () {
@@ -33,6 +32,29 @@ public class EnemySpawnController : MonoBehaviour {
 	public void SetGameStatus(string input){
 		gameStatus = input;
 	}
+
+	private int spawnTime = 0;
+	void bigMonster(Transform player,int offsetX,int offsetZ){
+        KillCount killCount = GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
+		if(killCount.GetCount()%10 == 0 && !bigMonsterSpawned)
+		{
+			Vector3 spawnPosition = new Vector3(player.position.x + offsetX,
+															player.position.y,
+															player.position.z + offsetZ);
+			GameObject spawnEnemy = Lean.LeanPool.Spawn(enemy[0],
+								spawnPosition,
+								Quaternion.identity,
+								transform);
+
+            MonsterController monsterController = spawnEnemy.GetComponent<MonsterController>();
+			monsterController.OnInit();
+			
+			bigMonsterSpawned = true;
+			print("Monster!!");
+		}else if(killCount.GetCount() % 10 == 1){
+			bigMonsterSpawned = false;
+		}
+	}
 	// Update is called once per frame
 	void Update () {
 		if(gameStatus.Equals("playing")){
@@ -42,13 +64,37 @@ public class EnemySpawnController : MonoBehaviour {
 				int liveEnemyCount = transform.childCount - 2;
 				if(liveEnemyCount < enemyCount){
 					Transform spawn = spawnPoints.GetChild(Random.Range(0,spawnPoints.childCount-1));
-					Vector3 spawnPosition = new Vector3(spawn.position.x - fixPosition.x,
-														spawn.position.y - fixPosition.y,
-														spawn.position.z - fixPosition.z);
-					Lean.LeanPool.Spawn(enemy[Random.Range(0,enemy.Count)],
+					GameObject player = GameObject.FindGameObjectWithTag("Player");
+					// Vector3 spawnPosition = new Vector3(spawn.position.x,
+					// 									2f,
+					// 									spawn.position.z);
+					const int baseDis = 10,bestFar = 20;
+					int offsetX = Random.Range(-bestFar, bestFar);
+					int offsetZ = Random.Range(-bestFar, bestFar);
+					if(offsetX > 0 && offsetX < baseDis){
+						offsetX = baseDis;
+					}else if(offsetX < 0 && offsetX > -baseDis){
+						offsetX = -baseDis;
+					}
+
+					if (offsetZ > 0 && offsetZ < baseDis)
+                    {
+                        offsetZ = baseDis;
+                    }else if (offsetZ < 0 && offsetZ > -baseDis)
+                    {
+                        offsetZ = -baseDis;
+                    }
+					Vector3 spawnPosition = new Vector3(player.transform.position.x + offsetX,
+														player.transform.position.y,
+														player.transform.position.z + offsetZ);
+					Lean.LeanPool.Spawn(enemy[1],
 										spawnPosition,
 										Quaternion.identity,
 										transform);
+
+					
+					bigMonster(player.transform,offsetX,offsetZ);
+					// Instantiate(enemy[Random.Range(0, enemy.Count)],spawnPosition,Quaternion.identity);
 				}
 				timeCount = interval;
 			}

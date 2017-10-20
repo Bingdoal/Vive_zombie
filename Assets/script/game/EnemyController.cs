@@ -107,7 +107,7 @@ public class EnemyController : MonoBehaviour
         navMesh.enabled = false;
 
         this.GetComponent<CapsuleCollider>().enabled = true;
-        _playSound(deadAC);
+        
         currentAction = status;
 
         KillCount killCount = GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
@@ -137,6 +137,9 @@ public class EnemyController : MonoBehaviour
     }
 	IEnumerator _delayRemove(float delayTime)
     {
+        audioSource.Stop();
+        audioSource.clip = deadAC;
+        audioSource.Play();
         yield return new WaitForSeconds(delayTime);
         Lean.LeanPool.Despawn(this.gameObject);
         _init();

@@ -22,6 +22,9 @@ public class KillCount : MonoBehaviour
     {
         count = 0;
     }
+    public int GetCount(){
+        return count;
+    }
     // Update is called once per frame
     void Update()
     {

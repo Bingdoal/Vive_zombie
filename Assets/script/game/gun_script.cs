@@ -69,7 +69,7 @@ public class gun_script : MonoBehaviour
                         EnemySpawnController enemySpawnController = GameObject.FindGameObjectWithTag("SpawnPoints").GetComponent<EnemySpawnController>();
                         enemySpawnController.SetGameStatus("playing");
                         StartGame menu = GameObject.FindGameObjectWithTag("menu").GetComponent<StartGame>();
-                        menu.StartGame();
+                        menu.GameStart();
                     }
                 }
 

@@ -217,7 +217,7 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 1.3346703
+  m_TransitionDuration: 0.8151233
   m_TransitionOffset: 0.052533437
   m_ExitTime: 0.01696793
   m_HasExitTime: 0
@@ -265,9 +265,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.54938745
-  m_TransitionOffset: 0.009109202
-  m_ExitTime: 0.8208503
+  m_TransitionDuration: 0.48711663
+  m_TransitionOffset: 0.120879434
+  m_ExitTime: 0.63403714
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -427,7 +427,7 @@ AnimatorState:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: creature1Die
-  m_Speed: 1
+  m_Speed: 0.5
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours: []

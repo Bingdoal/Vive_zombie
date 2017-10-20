@@ -971,7 +971,7 @@ GameObject:
   - component: {fileID: 195697326297696606}
   - component: {fileID: 114241497546221436}
   m_Layer: 0
-  m_Name: creature1
+  m_Name: monster
   m_TagString: monster
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2671,9 +2671,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healthPoint: 20
   damage: 4
-  attackAC: {fileID: 0}
-  deadAC: {fileID: 0}
+  attackAC: {fileID: 8300000, guid: a6ca8b7ab03ea1344903ed55145ed90c, type: 3}
+  deadAC: {fileID: 8300000, guid: bf648643fe845674384e3571e60a95b4, type: 3}
   walkAC: {fileID: 0}
+  getHitAC: {fileID: 8300000, guid: a312a701933573945bfe49c0e388cda0, type: 3}
+  roarAC: {fileID: 8300000, guid: ba212728f5f374340883050a08608331, type: 3}
   invincibleDelay: 0.4
 --- !u!136 &136959740460586526
 CapsuleCollider:
