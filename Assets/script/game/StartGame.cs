@@ -24,6 +24,12 @@ public class StartGame : MonoBehaviour
     {
         _setVisible(true);
         _stopSpawn();
+        KillCount killCount = GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
+        gun_script ak47 = GameObject.FindGameObjectWithTag("AK47").GetComponent<gun_script>();
+        bestKillScript bestKill = GameObject.FindGameObjectWithTag("bestKill").GetComponent<bestKillScript>();
+        ak47.Reloadbullet();
+        bestKill.UpdateBestKill(killCount.GetCount());
+        print("擊殺數:"+killCount.GetCount());
     }
 
     // Private method

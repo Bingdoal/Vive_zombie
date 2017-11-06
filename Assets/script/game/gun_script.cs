@@ -7,6 +7,8 @@ public class gun_script : MonoBehaviour
     public GameObject controllerLeft;
     [Tooltip("發射延遲")] [SerializeField] private float delay = 0.2f;
     [Tooltip("槍聲")] [SerializeField] private AudioClip gun_sound;
+    [Tooltip("傷害")][SerializeField] private float damage ;
+    
     [Tooltip("子彈數量")] [SerializeField] private int bullet = 30;
     [Tooltip("填彈音效")] [SerializeField] private AudioClip reloadsound;
     [Tooltip("缺彈音效")] [SerializeField] private AudioClip bulletEmpty;
@@ -56,10 +58,15 @@ public class gun_script : MonoBehaviour
                 {
                     try{
                         EnemyController collisionObject = hit.collider.gameObject.GetComponent<EnemyController>();
-                        collisionObject.ApplyDamage(2);
+                        collisionObject.ApplyDamage(damage);
                     }catch{
-                        MonsterController collisionObject = hit.collider.gameObject.GetComponent<MonsterController>();
-                        collisionObject.ApplyDamage(2);
+                        try{
+                            MonsterController collisionObject = hit.collider.gameObject.GetComponent<MonsterController>();
+                            collisionObject.ApplyDamage(damage);
+                        }catch{
+                            Healer healer = hit.collider.gameObject.GetComponent<Healer>();
+                            healer.ApplyDamage(damage);
+                        }
                     }
                 }
                 else

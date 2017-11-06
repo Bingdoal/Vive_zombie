@@ -21,11 +21,13 @@ public class MagReload : MonoBehaviour
 
 		 mag = magHand.GetComponent<SteamVR_TrackedController>();
 		mag.TriggerClicked+=getMag;
-		
+        
         trackedObject = magHand.GetComponent<SteamVR_TrackedObject>();
 
     }
+    void test(object sender, ClickedEventArgs e){
 
+    }
     void _reload(object sender, ClickedEventArgs e)
     {
         if (collision)
@@ -53,6 +55,6 @@ public class MagReload : MonoBehaviour
 	// Update is called once per frame
     void Update()
     {
-
+        
     }
 }

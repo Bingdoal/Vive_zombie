@@ -6,6 +6,8 @@ public class EnemySpawnController : MonoBehaviour {
 	[Tooltip("產怪的等級")][SerializeField]private string _level = "1";
 	[Tooltip("產怪的總量")][SerializeField]private int enemyCount = 60;
 	[Tooltip("產怪的間隔")][SerializeField]private float interval = 2f;
+	[Tooltip("BOSS 的間隔")][SerializeField]private int bossTiming ;
+
 	private float timeCount = 0;
 	private Transform spawnPoints;
 	private List<GameObject> enemy = new List<GameObject>();
@@ -13,9 +15,10 @@ public class EnemySpawnController : MonoBehaviour {
 	private bool bigMonsterSpawned = true;
 	private string gameStatus;
 	// Use this for initialization
+	private int _boosTiming;
 	void Start () {
 		timeCount = 2f;
-		
+		_boosTiming = bossTiming;
 		Transform spawnPoint = gameObject.transform.Find("SpawnPoints");
 
 		spawnPoints = spawnPoint.GetComponentInChildren<Transform>();
@@ -36,7 +39,7 @@ public class EnemySpawnController : MonoBehaviour {
 	private int spawnTime = 0;
 	void bigMonster(Transform player,int offsetX,int offsetZ){
         KillCount killCount = GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
-		if(killCount.GetCount()%10 == 0 && !bigMonsterSpawned)
+		if(killCount.GetCount()%_boosTiming == 0 && !bigMonsterSpawned)
 		{
 			Vector3 spawnPosition = new Vector3(player.position.x + offsetX,
 															player.position.y,
@@ -51,8 +54,23 @@ public class EnemySpawnController : MonoBehaviour {
 			
 			bigMonsterSpawned = true;
 			print("Monster!!");
-		}else if(killCount.GetCount() % 10 == 1){
+			if(_boosTiming >2) _boosTiming --;
+		}else if(killCount.GetCount() % _boosTiming == 1){
 			bigMonsterSpawned = false;
+		}
+	}
+	void healerSpawn(Transform player, int offsetX, int offsetZ){
+		if(Random.Range(0,100) <= 20){
+			Vector3 spawnPosition = new Vector3(player.position.x + offsetX,
+																player.position.y,
+																player.position.z + offsetZ);
+			GameObject spawnEnemy = Lean.LeanPool.Spawn(enemy[1],
+								spawnPosition,
+								Quaternion.identity,
+								transform);
+
+			Healer healer = spawnEnemy.GetComponent<Healer>();
+			healer.OnInit();
 		}
 	}
 	// Update is called once per frame
@@ -87,17 +105,22 @@ public class EnemySpawnController : MonoBehaviour {
 					Vector3 spawnPosition = new Vector3(player.transform.position.x + offsetX,
 														player.transform.position.y,
 														player.transform.position.z + offsetZ);
-					Lean.LeanPool.Spawn(enemy[1],
+					GameObject zombie = Lean.LeanPool.Spawn(enemy[2],
 										spawnPosition,
 										Quaternion.identity,
 										transform);
-
+					EnemyController enemyController = zombie.GetComponent<EnemyController>();
+					enemyController.OnInit();
 					
 					bigMonster(player.transform,offsetX,offsetZ);
+					healerSpawn(player.transform, offsetX, offsetZ);
 					// Instantiate(enemy[Random.Range(0, enemy.Count)],spawnPosition,Quaternion.identity);
 				}
 				timeCount = interval;
 			}
+		}else{
+			_boosTiming = bossTiming;
+			bigMonsterSpawned = true;
 		}
 	}
 }

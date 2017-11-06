@@ -11,6 +11,7 @@ TagManager:
   - menu
   - monster
   - UIcount
+  - bestKill
   layers:
   - Default
   - TransparentFX

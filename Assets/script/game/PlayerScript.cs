@@ -8,6 +8,8 @@ public class PlayerScript : MonoBehaviour
     [Tooltip("血量")] [SerializeField] private float healthPoint;
     [Tooltip("被打音效")] [SerializeField] private AudioClip attackedAC;
     [Tooltip("死亡音效")] [SerializeField] private AudioClip dieAC;
+    [Tooltip("補血音效")][SerializeField] private AudioClip healAC;
+    
     private AudioSource audioSource;
     private float _hp;
     public string status = "alive";
@@ -49,12 +51,16 @@ public class PlayerScript : MonoBehaviour
         menu.GameStop();
         _playSound(dieAC);
     }
-
     // Public method
     public void ApplyDamage(float _damage)
     {
+        if(_damage <0){
+            _playSound(healAC);
+        }else{
+            _playSound(attackedAC);
+        }
         float t = _hp - _damage;
-        _playSound(attackedAC);
+        
         if (t > 0)
         {
             _hp = t;

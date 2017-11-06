@@ -2652,7 +2652,7 @@ Animator:
   m_Avatar: {fileID: 9000000, guid: dfa9dd007e9fedc4b869bfd63bb3b284, type: 3}
   m_Controller: {fileID: 9100000, guid: e1a18ced681f4ce498ed681cd703ed37, type: 2}
   m_CullingMode: 1
-  m_UpdateMode: 0
+  m_UpdateMode: 1
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
@@ -2669,7 +2669,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a357dadbe60be542bbc4c67f279d8be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthPoint: 20
+  healthPoint: 16
   damage: 4
   attackAC: {fileID: 8300000, guid: a6ca8b7ab03ea1344903ed55145ed90c, type: 3}
   deadAC: {fileID: 8300000, guid: bf648643fe845674384e3571e60a95b4, type: 3}

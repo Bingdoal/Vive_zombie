@@ -49,7 +49,7 @@ public class MonsterController : MonoBehaviour
     private float interval = 1f;
     void ActionChange(string nextStatus)
     {
-        if (nextStatus.Equals("atk") && !ani.GetCurrentAnimatorStateInfo(0).IsName("creature1GetHit"))
+        if (nextStatus.Equals("atk"))
         {
             if (timeCount > 0)
             {
@@ -99,6 +99,7 @@ public class MonsterController : MonoBehaviour
 
         KillCount killCount = GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
         killCount.AddCount(1);
+        _SetCollider(false);
         StartCoroutine(_delayRemove(3f));
     }
     void SwitchWalk(bool value)
@@ -137,6 +138,7 @@ public class MonsterController : MonoBehaviour
         }
         if (navMesh.isOnNavMesh)
             navMesh.isStopped = true;
+        _SetCollider(true);
         invincible = false;
         _hp = healthPoint;
 
@@ -149,7 +151,6 @@ public class MonsterController : MonoBehaviour
         meshList = this.GetComponentsInChildren<SkinnedMeshRenderer>();
         
         StartCoroutine(_animationDelay());
-
     }
     void _startWalk()
     {
@@ -217,7 +218,10 @@ public class MonsterController : MonoBehaviour
         yield return new WaitForSeconds(delayTime);
         Lean.LeanPool.Despawn(this.gameObject);
     }
-
+    void _SetCollider(bool input){
+        CapsuleCollider capsule = this.GetComponent<CapsuleCollider>();
+        capsule.enabled = input;
+    }
     // Public method
     public void ApplyDamage(float _damageAmount)
     {
@@ -228,8 +232,8 @@ public class MonsterController : MonoBehaviour
             {
                 _hp = t;
                 StartCoroutine(_enterInvincible());
-                status = "GetHit";
-                ActionChange(status);
+                // status = "GetHit";
+                // ActionChange(status);
             }
             else
             {

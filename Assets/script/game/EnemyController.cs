@@ -22,9 +22,9 @@ public class EnemyController : MonoBehaviour
     private bool invincible;
     void Start()
     {
-        _init();
+        OnInit();
     }
-    void _init()
+    public void OnInit()
     {
         meshList = this.GetComponentsInChildren<SkinnedMeshRenderer>();
 
@@ -35,7 +35,7 @@ public class EnemyController : MonoBehaviour
             navMesh.radius = 0.3f;
         }
         navMesh.enabled = true;
-
+        _SetCollider(true);
         invincible = false;
         _hp = healthPoint;
         status = "walk";
@@ -48,6 +48,7 @@ public class EnemyController : MonoBehaviour
         {
             audioSource = this.gameObject.AddComponent<AudioSource>();
         }
+        
         _playSound(walkAC);
     }
     // Update is called once per frame
@@ -112,7 +113,8 @@ public class EnemyController : MonoBehaviour
 
         KillCount killCount = GameObject.FindGameObjectWithTag("UIcount").GetComponent<KillCount>();
         killCount.AddCount(1);
-        StartCoroutine(_delayRemove(3f));
+        _SetCollider(false);
+        StartCoroutine(_delayRemove(1.5f));
     }
     void SwitchAttack(bool value)
     {
@@ -142,7 +144,6 @@ public class EnemyController : MonoBehaviour
         audioSource.Play();
         yield return new WaitForSeconds(delayTime);
         Lean.LeanPool.Despawn(this.gameObject);
-        _init();
     }
     IEnumerator _enterInvincible()
     {
@@ -152,6 +153,11 @@ public class EnemyController : MonoBehaviour
         _changeColor(Color.white);
         invincible = false;
         StopCoroutine(_enterInvincible());
+    }
+    void _SetCollider(bool input)
+    {
+        CapsuleCollider capsule = this.GetComponent<CapsuleCollider>();
+        capsule.enabled = input;
     }
     void _changeColor(Color input)
     {
